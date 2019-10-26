@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <ctime>
 
+je suis sur une branche
+
 using namespace std;
 
 	/* COMMAND LINK EXAMPLE : ./launcher_generation_data_main . test 4 generation_data.par patterns.txt
