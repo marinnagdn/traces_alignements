@@ -6,6 +6,9 @@
 #include <cctype>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
+#include <random>
+
 
 using namespace std;
 
@@ -16,16 +19,47 @@ using namespace std;
 	C plus rapide que C++ ... Désire t elle qu'on fasse du C ?
 	*/
 
-
-int rand_a_b(int a, int b){
 /*Générer un nombre aléatoire entre a et b, a<b */
+int rand_a_b(int a, int b){
 	srand(time(NULL));
     return rand()%(b-a) +a;
 }
 
+/* Ajouter un  élément dans une trace particulière */
+void add_element_one_trace(vector<vector<string>> &traces, vector<string> element, int numero_trace) {
+	traces.push_back(element);
+} 
 
-/* A RETRAVAILLER */
-int type_of_site(string description, bool &vide_possible) {
+
+/* Ajouter le même élément dans toutes les traces */
+void add_element_all_traces(vector<vector<string>> &traces, vector<string> element) {
+	cout << "taille du tableau : " << traces.size() << endl;
+	for (int i = 0; i < traces.size(); i++) {
+		traces.push_back(element);
+	}
+} 
+
+/*Afficher les traces */
+void afficher_traces(vector<vector<string>> &traces) {
+	cout << "***" << endl;
+	for (int i = 0; i < traces.size(); i++) {
+		for (int j = 0; j < traces[i].size(); j++) {
+			cout << traces[i][j] ;
+		}
+		cout << endl; 
+	}
+	cout << "***" << endl;
+}
+
+/* Shuffle traces */
+void shuffle_traces(vector<vector<string>> & traces) {
+	random_device rd;
+	mt19937 g(rd());
+	shuffle(traces.begin(), traces.end(), g);
+}
+
+/*Définir type expression de site*/
+int which_type_of_site(string description, bool &vide_possible) {
 	// int delimiter = description.find('|');
 	// if (delimiter != string::npos) {
 	// 	delimiter = description.find ('%');
@@ -40,11 +74,10 @@ int type_of_site(string description, bool &vide_possible) {
 	cout << endl;
 
 	return 0;
-
 }
 
-//BIEN PENSER A MODIF TYPE traces
-void site_percentage_generation(const string expression, string* &traces, int nb_seq, int duree1, int duree2) {
+/* Génération des sites à % */
+void site_percentage_generation(const string expression, vector<vector<string>> &traces, int nb_seq, int duree1, int duree2) {
 	int seq = 0;
 	int delimiter1 = expression.find('|');
 	string evenement;
@@ -55,21 +88,44 @@ void site_percentage_generation(const string expression, string* &traces, int nb
 			evenement = expression.substr(0, delimiter2);
 			nb_apparition_evenement = stoi(expression.substr(delimiter2+1));
 
+				vector<string> chaos = {};
+				int al_number; //nombre de points
+				int al_position; //position évenement
+
 			while (nb_apparition_evenement != 0) {
-				//generer les points selon chiffre piqué au hasard entre d1 et d2
-				//generer position aléatoire au sein de ces points
-				//placer l'évenement dedans
+
+			
+				al_number = rand_a_b(duree1, duree2);
+
+				for (int i = 0; i < al_number; i++) {
+					chaos.push_back(".") ;
+				}
+
+				al_position = rand_a_b(0, al_number-1);
+				chaos[al_position] = evenement; //On place l'évenement
+
+				add_element_one_trace(traces, chaos, seq);
+
 				seq += 1;
 				nb_apparition_evenement -= 1;
+				chaos = {};
 			}
 
 			//Plus d'évenement à placer 
 			while (seq != nb_seq) { //il faut continuer à générer les points pour les séquences restantes
-				//generer les points selon chiffre piqué au hasard entre d1 et d2
+				al_number = rand_a_b(duree1, duree2);
+
+				for (int i = 0; i < al_number; i++) {
+					chaos.push_back(".") ;
+				}
+
+				add_element_one_trace(traces, chaos, seq);
+
 				seq +=1;
+				chaos = {};
 			}
 
-			//Shuffle le tableau
+			shuffle_traces(traces);
 
 		} else { //Plusieurs %
 
@@ -105,22 +161,17 @@ void site_percentage_generation(const string expression, string* &traces, int nb
 					//placer l'évenement dedans
 					seq += 1;
 					nb_apparition_evenement -= 1;
-				}
+		}
 
 
-			//Plus d'évenement à placer 
-			while (seq != nb_seq) { //il faut continuer à générer les points pour les séquences restantes
-					//generer les points selon chiffre piqué au hasard entre d1 et d2
-				seq +=1;
-			}
-
+		//Plus d'évenement à placer 
+		while (seq != nb_seq) { //il faut continuer à générer les points pour les séquences restantes
+				//generer les points selon chiffre piqué au hasard entre d1 et d2
+			seq +=1;
+		}
 			//Shuffle le tableau
-
 	}
-
-
 }
-
 
 
 int main(int argc, char** argv) {
@@ -264,7 +315,7 @@ int main(int argc, char** argv) {
 		//Type description du site
 		bool aucun_evenement_possible = 0 ;
 		int type_site = 0;
-		type_site = type_of_site(description_site, aucun_evenement_possible);
+		type_site = which_type_of_site(description_site, aucun_evenement_possible);
 
 		delimiter1 = last_part_expression.find('<');
 
@@ -274,10 +325,20 @@ int main(int argc, char** argv) {
 	cout << "dernier jalon : " << last_part_expression << endl;
 
 	//GENERATION DU TABLEAU
-	// string* elements;
-	// elements* sequences;
+	vector<vector<string>> Traces (number_seq_max);
+	vector<string> ev = {"E1"};
+	vector<string> ch = {".",".","."};
+
+	add_element_all_traces(Traces, ev);
+	afficher_traces(Traces);
+	add_element_one_trace(Traces, ch , 2);
+	afficher_traces(Traces);
+	shuffle_traces(Traces);
+	afficher_traces(Traces);
 
 	return 0;
-
 }
 
+/*
+Réussir à ajouter des vecteur de string dans des vecteurs de vecteurs de string
+*/
