@@ -9,18 +9,119 @@
 
 using namespace std;
 
-	/* COMMAND LINK EXAMPLE : ./launcher_generation_data_main . test 4 generation_data.par patterns.txt
+	/* COMMAND LINK EXAMPLE : ./launcher_generation_data_main . test 4 generation_data.par
 
 	Command line arguments example : 
 	https://www.geeksforgeeks.org/find-largest-among-three-different-positive-numbers-using-command-line-argument/
 	C plus rapide que C++ ... Désire t elle qu'on fasse du C ?
 	*/
 
+
 int rand_a_b(int a, int b){
 /*Générer un nombre aléatoire entre a et b, a<b */
 	srand(time(NULL));
     return rand()%(b-a) +a;
 }
+
+
+/* A RETRAVAILLER */
+int type_of_site(string description, bool &vide_possible) {
+	// int delimiter = description.find('|');
+	// if (delimiter != string::npos) {
+	// 	delimiter = description.find ('%');
+	// }
+	bool is_matching;
+
+	// is_matching = regex_match(description, regex("(.+)(\\|+.+)*"));
+	is_matching = regex_match(description, regex("(.+)(\\|+)"));
+
+	cout << description << endl;
+	cout << (is_matching ? "ça match" : "ça match pas") ;
+	cout << endl;
+
+	return 0;
+
+}
+
+//BIEN PENSER A MODIF TYPE traces
+void site_percentage_generation(const string expression, string* &traces, int nb_seq, int duree1, int duree2) {
+	int seq = 0;
+	int delimiter1 = expression.find('|');
+	string evenement;
+	int nb_apparition_evenement;
+
+	if (delimiter1 == string::npos ) { //1 seul %
+			int delimiter2 = expression.find('%');
+			evenement = expression.substr(0, delimiter2);
+			nb_apparition_evenement = stoi(expression.substr(delimiter2+1));
+
+			while (nb_apparition_evenement != 0) {
+				//generer les points selon chiffre piqué au hasard entre d1 et d2
+				//generer position aléatoire au sein de ces points
+				//placer l'évenement dedans
+				seq += 1;
+				nb_apparition_evenement -= 1;
+			}
+
+			//Plus d'évenement à placer 
+			while (seq != nb_seq) { //il faut continuer à générer les points pour les séquences restantes
+				//generer les points selon chiffre piqué au hasard entre d1 et d2
+				seq +=1;
+			}
+
+			//Shuffle le tableau
+
+		} else { //Plusieurs %
+
+		string first_part_expression, last_part_expression;
+		last_part_expression = expression;
+
+		while (delimiter1 != string::npos ) {
+			first_part_expression = last_part_expression.substr(0, delimiter1);
+			last_part_expression = last_part_expression.substr(delimiter1 + 1);
+			int delimiter2 = first_part_expression.find('%');
+			evenement = first_part_expression.substr(0, delimiter2);
+			nb_apparition_evenement = stoi(first_part_expression.substr(delimiter2+1));
+
+			while (nb_apparition_evenement != 0) {
+					//generer les points selon chiffre piqué au hasard entre d1 et d2
+					//generer position aléatoire au sein de ces points
+					//placer l'évenement dedans
+					seq += 1;
+					nb_apparition_evenement -= 1;
+				}
+
+			delimiter1 = last_part_expression.find('|');
+		}
+
+		//Pour le dernier %
+		int delimiter2 = last_part_expression.find('%');
+		evenement = last_part_expression.substr(0, delimiter2);
+		nb_apparition_evenement = stoi(last_part_expression.substr(delimiter2+1));
+
+		while (nb_apparition_evenement != 0) {
+					//generer les points selon chiffre piqué au hasard entre d1 et d2
+					//generer position aléatoire au sein de ces points
+					//placer l'évenement dedans
+					seq += 1;
+					nb_apparition_evenement -= 1;
+				}
+
+
+			//Plus d'évenement à placer 
+			while (seq != nb_seq) { //il faut continuer à générer les points pour les séquences restantes
+					//generer les points selon chiffre piqué au hasard entre d1 et d2
+				seq +=1;
+			}
+
+			//Shuffle le tableau
+
+	}
+
+
+}
+
+
 
 int main(int argc, char** argv) {
 
@@ -30,7 +131,7 @@ int main(int argc, char** argv) {
 	*/
 
 	//checking
-	if (argc != 6) {
+	if (argc != 5) {
 		cerr << "Bad number of arguments. Check readme.md" << endl;
 		exit(1);
 	}
@@ -105,7 +206,6 @@ int main(int argc, char** argv) {
 
 	//Premier parcours : vérification si la somme des apparitions d'évenements est cohérente avec le nombre de séquence maximale
 
-	string tmp;
 	string first_part_expression;
 	string last_part_expression;
 	string exp;
@@ -113,7 +213,7 @@ int main(int argc, char** argv) {
 	int d1, d2; //durées 1 et 2
 	int somme_d2 = 0; //vérifier si la somme des d2 est < longueur maximale d'une séquence
 	string description_site; //partie variable
-	int delimiter1, delimiter2, delimiter3, delimiter4, delimiter5, delimiter6; // <, >, |, (, ), ...
+	int delimiter1, delimiter2; // <, >, |, (, ), ...
 
 	last_part_expression = expression;
 	delimiter1 = last_part_expression.find('<');
@@ -161,6 +261,11 @@ int main(int argc, char** argv) {
 		exit (5);
 		}
 
+		//Type description du site
+		bool aucun_evenement_possible = 0 ;
+		int type_site = 0;
+		type_site = type_of_site(description_site, aucun_evenement_possible);
+
 		delimiter1 = last_part_expression.find('<');
 
 	}
@@ -168,6 +273,9 @@ int main(int argc, char** argv) {
 	jalon = last_part_expression;
 	cout << "dernier jalon : " << last_part_expression << endl;
 
+	//GENERATION DU TABLEAU
+	// string* elements;
+	// elements* sequences;
 
 	return 0;
 
