@@ -1,26 +1,10 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <regex>
-#include <algorithm>
-#include <cctype>
-#include <cstdlib>
-#include <ctime>
+/* COMMAND LINK EXAMPLE : ./launcher_generation_data_main . test 4 generation_data.par
 
-using namespace std;
+/* Penser à gérer si nb % > nb sequence !!! */
 
-	/* COMMAND LINK EXAMPLE : ./launcher_generation_data_main . test 4 generation_data.par patterns.txt
+#include "launcher_generation_data_functions.cpp"
 
-	Command line arguments example : 
-	https://www.geeksforgeeks.org/find-largest-among-three-different-positive-numbers-using-command-line-argument/
-	C plus rapide que C++ ... Désire t elle qu'on fasse du C ?
-	*/
-
-int rand_a_b(int a, int b){
-/*Générer un nombre aléatoire entre a et b, a<b */
-	srand(time(NULL));
-    return rand()%(b-a) +a;
-}
+auto start = high_resolution_clock::now(); 
 
 int main(int argc, char** argv) {
 
@@ -30,7 +14,7 @@ int main(int argc, char** argv) {
 	*/
 
 	//checking
-	if (argc != 6) {
+	if (argc != 5) {
 		cerr << "Bad number of arguments. Check readme.md" << endl;
 		exit(1);
 	}
@@ -99,21 +83,19 @@ int main(int argc, char** argv) {
 	cout << "Number of seqs by dataset : " << number_seq_max << endl;
 	cout << "Length max for a seq : " << length_seq_max << endl;
 	cout << "Expression : " << expression << endl;
-	cout << "_____" << endl;
 
 	/* ZONE EN TRAVAUX */
 
 	//Premier parcours : vérification si la somme des apparitions d'évenements est cohérente avec le nombre de séquence maximale
 
-	string tmp;
 	string first_part_expression;
 	string last_part_expression;
 	string exp;
-	string jalon; //jalon de gauche
+	string premier_jalon, dernier_jalon; //jalon de gauche
 	int d1, d2; //durées 1 et 2
 	int somme_d2 = 0; //vérifier si la somme des d2 est < longueur maximale d'une séquence
 	string description_site; //partie variable
-	int delimiter1, delimiter2, delimiter3, delimiter4, delimiter5, delimiter6; // <, >, |, (, ), ...
+	int delimiter1, delimiter2; // <, >, |, (, ), ...
 
 	last_part_expression = expression;
 	delimiter1 = last_part_expression.find('<');
@@ -124,10 +106,9 @@ int main(int argc, char** argv) {
 		delimiter2 = last_part_expression.find('>');
 		first_part_expression	= last_part_expression.substr(0, delimiter2);
 		last_part_expression = last_part_expression.substr(delimiter2+1);
-		cout << "expression restante : " << last_part_expression << endl;
 		
 		//Jalon
-		jalon = first_part_expression.substr(0, delimiter1);
+		premier_jalon = first_part_expression.substr(0, delimiter1);
 
 		//Durée 1
 		delimiter1 = first_part_expression.find('(');
@@ -148,10 +129,10 @@ int main(int argc, char** argv) {
 		description_site = exp.substr(0,delimiter2);
 
 		//Vérifs
-		cout << "jalon de gauche : " << jalon << endl;
-		cout << "d1 : " << d1 << endl;
-		cout << "d2 : " << d2 << endl;
-		cout << "description du site : " << description_site << endl;
+		// cout << "premier jalon : " << premier_jalon << endl;
+		// cout << "d1 : " << d1 << endl;
+		// cout << "d2 : " << d2 << endl;
+		// cout << "description du site : " << description_site << endl;
 
 		//Vérification si cohérence avec longueur max des séquences
 		somme_d2  += d2;
@@ -161,15 +142,68 @@ int main(int argc, char** argv) {
 		exit (5);
 		}
 
+		//Type description du site
+		// bool aucun_evenement_possible = 0 ;
+		// int type_site = 0;
+		// type_site = which_type_of_site(description_site, aucun_evenement_possible);
+
 		delimiter1 = last_part_expression.find('<');
 
 	}
 
-	jalon = last_part_expression;
-	cout << "dernier jalon : " << last_part_expression << endl;
+	dernier_jalon = last_part_expression;
 
+	/* Vérification terminée */
+	//GENERATION DU TABLEAU
+	vector<vector<string>> Traces (number_seq_max);
+
+	last_part_expression = expression;
+	delimiter1 = last_part_expression.find('<');
+
+	while (delimiter1 != string::npos) {
+
+		//Découpage progressif de l'expression
+		delimiter2 = last_part_expression.find('>');
+		first_part_expression	= last_part_expression.substr(0, delimiter2);
+		last_part_expression = last_part_expression.substr(delimiter2+1);
+
+		//Premier jalon
+		premier_jalon = first_part_expression.substr(0, delimiter1)+" ";
+
+		//Durée 1
+		delimiter1 = first_part_expression.find('(');
+		exp = first_part_expression.substr(delimiter1+1);
+		delimiter2 = exp.find('-');
+		d1 = stoi(exp.substr(0,delimiter2));
+
+		//Durée 2
+		delimiter1 = first_part_expression.find('-');
+		exp = first_part_expression.substr(delimiter1+1);
+		delimiter2 = exp.find(')');
+		d2 = stoi(exp.substr(0,delimiter2));
+
+		//Description du site
+		delimiter1 = first_part_expression.find(')');
+		exp = first_part_expression.substr(delimiter1+1);
+		delimiter2 = exp.find('>');
+		description_site = exp.substr(0,delimiter2);
+
+		add_element_all_traces(Traces, premier_jalon);
+		site_percentage_generation(Traces, description_site, number_seq_max, d1, d2);
+		
+		delimiter1 = last_part_expression.find('<');
+
+	}
+
+	dernier_jalon = last_part_expression;
+
+	add_element_all_traces(Traces, dernier_jalon); //ajout dernier jalon
+	afficher_traces(Traces);
+
+	auto stop = high_resolution_clock::now(); 
+	auto duration = duration_cast<microseconds>(stop - start); 
+  cout << "Execution time : " << duration.count() << " microseconds" << endl; 
 
 	return 0;
-
 }
 
