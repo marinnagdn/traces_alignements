@@ -2,6 +2,8 @@
 
 /* Penser à gérer si nb % > nb sequence !!! */
 
+/* https://regex101.com/ */ 
+
 #include "launcher_generation_data_functions.cpp"
 
 auto start = high_resolution_clock::now(); 
@@ -84,21 +86,28 @@ int main(int argc, char** argv) {
 	cout << "Length max for a seq : " << length_seq_max << endl;
 	cout << "Expression : " << expression << endl;
 
-	/* ZONE EN TRAVAUX */
+	//GO GO GO
 
-	//Premier parcours : vérification si la somme des apparitions d'évenements est cohérente avec le nombre de séquence maximale
+	bool continuer = 0;
+	string premier_jalon, dernier_jalon; //Jalons de part et d'autre des chevrons
+	int d1, d2; //durées 1 et 2
+	string description_site;
 
+	//Reconnaissance des pattern d'expression, les valeurs sont elles cohérentes ?
+	vector <int> type_of_sites = {}; //contient les types des sites
+	/* 1 : |, 2 : %, 3: : */
 	string first_part_expression;
 	string last_part_expression;
 	string exp;
-	string premier_jalon, dernier_jalon; //jalon de gauche
-	int d1, d2; //durées 1 et 2
 	int somme_d2 = 0; //vérifier si la somme des d2 est < longueur maximale d'une séquence
-	string description_site; //partie variable
 	int delimiter1, delimiter2; // <, >, |, (, ), ...
+	int nb_sites = 1;
 
 	last_part_expression = expression;
 	delimiter1 = last_part_expression.find('<');
+	
+	//Jalon
+	premier_jalon = last_part_expression.substr(0, delimiter1)+" ";
 
 	while (delimiter1 != string::npos) {
 
@@ -106,9 +115,6 @@ int main(int argc, char** argv) {
 		delimiter2 = last_part_expression.find('>');
 		first_part_expression	= last_part_expression.substr(0, delimiter2);
 		last_part_expression = last_part_expression.substr(delimiter2+1);
-		
-		//Jalon
-		premier_jalon = first_part_expression.substr(0, delimiter1);
 
 		//Durée 1
 		delimiter1 = first_part_expression.find('(');
@@ -143,66 +149,63 @@ int main(int argc, char** argv) {
 		}
 
 		//Type description du site
-		// bool aucun_evenement_possible = 0 ;
-		// int type_site = 0;
-		// type_site = which_type_of_site(description_site, aucun_evenement_possible);
+		bool aucun_evenement_possible = 0 ;
+		int type_site = 0;
+		type_site = which_type_of_site(description_site, aucun_evenement_possible);
+
+		if (type_site == 0) {
+			cerr << "Number " << nb_sites << " : Unknown type of site" << endl;
+			exit(7);
+		}
+
+		type_of_sites.push_back(type_site);
+
+		// cout << "type du site : " << type_site << endl;
 
 		delimiter1 = last_part_expression.find('<');
+
+		nb_sites += 1;
 
 	}
 
 	dernier_jalon = last_part_expression;
+	
+	continuer = 1; //vérif ok
 
-	/* Vérification terminée */
-	//GENERATION DU TABLEAU
-	vector<vector<string>> Traces (number_seq_max);
+	if (continuer) {
 
-	last_part_expression = expression;
-	delimiter1 = last_part_expression.find('<');
+		srand(time(NULL));  //set seed to generate random number
+		// Génération du tableau
+		vector<vector<string>> Traces (number_seq_max);
+		int type_site = 0 ;
 
-	while (delimiter1 != string::npos) {
+		handle_sites(Traces, premier_jalon, dernier_jalon, d1,  d2, expression, number_seq_max, type_of_sites);
 
-		//Découpage progressif de l'expression
-		delimiter2 = last_part_expression.find('>');
-		first_part_expression	= last_part_expression.substr(0, delimiter2);
-		last_part_expression = last_part_expression.substr(delimiter2+1);
+		// for (auto i = 0; i < type_of_site.size(); i++) {
 
-		//Premier jalon
-		premier_jalon = first_part_expression.substr(0, delimiter1)+" ";
+		// 	type_site = type_of_site[i];
 
-		//Durée 1
-		delimiter1 = first_part_expression.find('(');
-		exp = first_part_expression.substr(delimiter1+1);
-		delimiter2 = exp.find('-');
-		d1 = stoi(exp.substr(0,delimiter2));
+		// 	switch (type_site) {
+		// 		case  1: 
+		// 			handle_site_percentage(Traces, premier_jalon, dernier_jalon, d1,  d2, expression, number_seq_max);
+		// 			break;
 
-		//Durée 2
-		delimiter1 = first_part_expression.find('-');
-		exp = first_part_expression.substr(delimiter1+1);
-		delimiter2 = exp.find(')');
-		d2 = stoi(exp.substr(0,delimiter2));
+		// 	}
 
-		//Description du site
-		delimiter1 = first_part_expression.find(')');
-		exp = first_part_expression.substr(delimiter1+1);
-		delimiter2 = exp.find('>');
-		description_site = exp.substr(0,delimiter2);
+		// }
 
-		add_element_all_traces(Traces, premier_jalon);
-		site_percentage_generation(Traces, description_site, number_seq_max, d1, d2);
-		
-		delimiter1 = last_part_expression.find('<');
+		afficher_traces(Traces);
 
 	}
 
-	dernier_jalon = last_part_expression;
 
-	add_element_all_traces(Traces, dernier_jalon); //ajout dernier jalon
-	afficher_traces(Traces);
 
+	// _____________________________________//
 	auto stop = high_resolution_clock::now(); 
 	auto duration = duration_cast<microseconds>(stop - start); 
-  cout << "Execution time : " << duration.count() << " microseconds" << endl; 
+	cout << "Execution time : " << duration.count() << " microseconds" << endl; 
+	// _____________________________________//
+
 
 	return 0;
 }
