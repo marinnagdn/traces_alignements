@@ -1,0 +1,10 @@
+E1 . E2 . A3 . E3 . A5 . E4 . A7 A6 . . E5
+E1 . . A1 . E2 . . . . E3 A4 E4 A7 A6 A6 . . E5
+E1 . . E2 . A3 . E3 A4 . . E4 A6 . . . . A7 . E5
+E1 . . . E2 . E3 A4 E4 . . . . . A6 A7 A6 . E5
+E1 A2 . . . E2 . . E3 A4 E4 . . A6 . . A6 A7 . E5
+E1 . . . . . . . . . E2 . . . . E3 A4 E4 A6 . A7 . A6 E5
+E1 . . . . . A1 . . E2 . E3 A4 . . E4 . . A7 . . . A6 . E5
+E1 A2 . E2 A3 . . E3 A4 . E4 A7 A6 . . . E5
+E1 A1 E2 . A3 . E3 A4 E4 . . A6 . A7 A6 . E5
+E1 A1 . . E2 A3 E3 A5 . E4 A6 A7 . . A6 . . . E5

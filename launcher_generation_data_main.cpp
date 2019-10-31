@@ -1,6 +1,6 @@
 /* COMMAND LINK EXAMPLE : ./launcher_generation_data_main . test 4 generation_data.par
 
-/* Penser à gérer si nb % > nb sequence !!! */
+/* Penser à gérer si nb % > nb traceuence !!! */
 
 /* https://regex101.com/ */ 
 
@@ -9,11 +9,6 @@
 auto start = high_resolution_clock::now(); 
 
 int main(int argc, char** argv) {
-
-	/*
-	Séparer les déclarations de variables de leur affectation ?
-	try except en C++ ?
-	*/
 
 	//checking
 	if (argc != 5) {
@@ -34,8 +29,8 @@ int main(int argc, char** argv) {
 	//lire le fichier de paramètres
 
 	/* obligé de les déclarer en amont du while sinon n'est pas gardé en mémoire */
-	int number_seq_max; //contient le nombre de séquences maximum par jeu de données
-	int length_seq_max; //contient la longueur maximum des séquences
+	int number_trace_max; //contient le nombre de séquences maximum par jeu de données
+	int length_trace_max; //contient la longueur maximum des séquences
 	string expression; //contient l'expression de génération des pattern de séquences
 	int delimiter;
 	string name_parameter;
@@ -52,12 +47,12 @@ int main(int argc, char** argv) {
                 continue;
             delimiter = line.find(":"); //délimiteur entre le nom du paramètre et le paramètre lui-même
             name_parameter = line.substr(0, delimiter); 
-             if (name_parameter == "number_seq_max" ) {
+             if (name_parameter == "number_trace_max" ) {
              	/* check if int */
-            	number_seq_max = stoi(line.substr(delimiter + 1));
-            } else if (name_parameter == "length_seq_max" ) {
+            	number_trace_max = stoi(line.substr(delimiter + 1));
+            } else if (name_parameter == "length_trace_max" ) {
             	/* check if int */
-				length_seq_max = stoi(line.substr(delimiter + 1));
+				length_trace_max = stoi(line.substr(delimiter + 1));
             } else if (name_parameter == "expression" ) {
             	/* check if known expression with a global regex */
 				expression = line.substr(delimiter + 1);
@@ -82,8 +77,8 @@ int main(int argc, char** argv) {
 	}
 
 	//Affichage des paramètres
-	cout << "Number of seqs by dataset : " << number_seq_max << endl;
-	cout << "Length max for a seq : " << length_seq_max << endl;
+	cout << "Number of traces by dataset : " << number_trace_max << endl;
+	cout << "Length max for a trace : " << length_trace_max << endl;
 	cout << "Expression : " << expression << endl;
 
 	//GO GO GO
@@ -142,20 +137,55 @@ int main(int argc, char** argv) {
 
 		//Vérification si cohérence avec longueur max des séquences
 		somme_d2  += d2;
-		if (somme_d2 > length_seq_max) {
+		if (somme_d2 > length_trace_max) {
 			cout << "somme des d2 : " << somme_d2 << endl;
-			cerr << "too long !!!!!!" << endl;
+			cerr << "Max sum of time points greater than max length of traces" << endl;
 		exit (5);
 		}
 
 		//Type description du site
 		bool aucun_evenement_possible = 0 ;
 		int type_site = 0;
+		vector<char> delimiters;
+		int somme_nb_apparition_evenement;
 		type_site = which_type_of_site(description_site, aucun_evenement_possible);
 
-		if (type_site == 0) {
-			cerr << "Number " << nb_sites << " : Unknown type of site" << endl;
-			exit(7);
+		switch (type_site) {
+
+			case 1:
+				delimiters = {'|' , '%'};
+				somme_nb_apparition_evenement=compte_somme_nb_apparition_evenement(description_site, number_trace_max, length_trace_max, delimiters);
+				if (somme_nb_apparition_evenement > number_trace_max) {
+					cerr << "Site number " << nb_sites << " : number max of events greater than number of traces." << endl;
+					exit (6);
+				}
+				break;
+
+			case 2:
+				delimiters = {'|'};
+				somme_nb_apparition_evenement=compte_somme_nb_apparition_evenement(description_site, number_trace_max, length_trace_max, delimiters);
+				if (somme_nb_apparition_evenement > number_trace_max) {
+					cerr << "Site number " << nb_sites << " : number max of events greater than number of traces." << endl;
+					exit (6);
+				}
+				break;
+
+			case 3:
+				delimiters = {';' , ':'};
+				somme_nb_apparition_evenement=compte_somme_nb_apparition_evenement(description_site, number_trace_max, length_trace_max, delimiters);
+				if (somme_nb_apparition_evenement > length_trace_max) {
+					cerr << "Site number " << nb_sites << " : number max of events greater than length of traces." << endl;
+					exit (6);
+				} else if (somme_nb_apparition_evenement > d2) {
+					cerr << "Site number " << nb_sites << " : number max of events greater than max time points." << endl;
+					exit (7);
+				}
+				break;
+
+			default:
+				cerr << "Site number " << nb_sites << " : Unknown type of site" << endl;
+				exit(8);
+
 		}
 
 		type_of_sites.push_back(type_site);
@@ -176,28 +206,30 @@ int main(int argc, char** argv) {
 
 		srand(time(NULL));  //set seed to generate random number
 		// Génération du tableau
-		vector<vector<string>> Traces (number_seq_max);
+		vector<vector<string>> Traces (number_trace_max);
 		int type_site = 0 ;
+		string name_outfile;
 
-		handle_sites(Traces, premier_jalon, dernier_jalon, d1,  d2, expression, number_seq_max, type_of_sites);
+		for (int nb_data = 0; nb_data < number_generated_data; nb_data++) {
 
-		// for (auto i = 0; i < type_of_site.size(); i++) {
+			handle_sites(Traces, premier_jalon, dernier_jalon, d1,  d2, expression, number_trace_max, type_of_sites);
+			afficher_traces(Traces);
 
-		// 	type_site = type_of_site[i];
+			name_outfile = output_directory+"/"+prefix_generation_data+"_"+to_string(nb_data+1)+".txt";
 
-		// 	switch (type_site) {
-		// 		case  1: 
-		// 			handle_site_percentage(Traces, premier_jalon, dernier_jalon, d1,  d2, expression, number_seq_max);
-		// 			break;
+			ofstream outfile (name_outfile);
 
-		// 	}
+			save_traces(Traces, outfile);
 
-		// }
 
-		afficher_traces(Traces);
+			//Reinitialiser le tableau des trâces
+			for (int i = 0; i < Traces.size(); i++){
+				Traces[i].clear();
+			}
+
+		}
 
 	}
-
 
 
 	// _____________________________________//
