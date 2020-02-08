@@ -1,7 +1,8 @@
-#Snowplow
-#####Snowplow is the name of our variante, that means "chasse-neige".
+# Snowplow
 
-##Description of the variante :
+##### Snowplow is the name of our variante, that means "chasse-neige".
+
+## Description of the variante :
 
 The user gives a size of a window that will go over the alignment  (Example : 5)
 Step by step, the algorithm will inspect column by column, searching for event. 
@@ -17,33 +18,39 @@ Furthermore, if a dot is in a column of event(s), it can be pushed on the right 
 
 The algorithm will stop automatically the resulting alignment is the same than the previous alignment of the precedent loop.
 
-##Installation, needed libraries and compilation
+## Installation, needed libraries and compilation
 
 Just uncompress the archive to use Snowplow
 
 *Needed libraries are :*
-	- iostream
-	- string
-	- vector
-	- algorithm
-	- fstream
-	- chrono
+
+- iostream
+
+- string
+
+- vector
+
+- algorithm
+
+- fstream
+
+- chrono
 	
 do :
 `make` 
 to compile the program
 
-##General example of use :
+## General example of use :
 
 `./launch_gaudin_pommellec_variante_1.py alignment.txt variante_1.par res_dir/`
 
-	- alignment.txt : path file of alignment resulting of standard method
+- alignment.txt : path file of alignment resulting of standard method
 
-	elements must be separated with tabulations, with no added spaces or tabulations at the end of the line, one trace by line
-	with the same number of elements by line(as they are aligned)
+elements must be separated with tabulations, with no added spaces or tabulations at the end of the line, one trace by line
+with the same number of elements by line(as they are aligned)
 
-	- variante_1.par : parameters file of the variante
-	- res_dir : target directory for the results
+- variante_1.par : parameters file of the variante
+- res_dir : target directory for the results
 	
 ### From toy_example repertory
 
@@ -55,13 +62,13 @@ The outputs will be :
 snowplow_standard_n40_l20_hard.txt
 snowplow_standard_n40_l20_hard.csv
 
-##Parameters :
+## Parameters :
 
-	- size_window : gives the size of the window that will cross the alignment, in which the events can be pushed
-	- nbr_loops_max : maximal number of loops of snowplow
-	
-	**Default parameters are :**
-	size_window : 5
-	nbr_loops_max : 10
+- size_window : gives the size of the window that will cross the alignment, in which the events can be pushed
+- nbr_loops_max : maximal number of loops of snowplow
+
+**Default parameters are :**
+size_window : 5
+nbr_loops_max : 10
 
 *Implemented by Marinna Gaudin and Jolann Pommellec*
