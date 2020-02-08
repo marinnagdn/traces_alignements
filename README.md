@@ -68,7 +68,8 @@ snowplow_standard_n40_l20_hard.csv
 - nbr_loops_max : maximal number of loops of snowplow
 
 **Default parameters are :**
-size_window : 5
-nbr_loops_max : 10
+
+- size_window : 5
+- nbr_loops_max : 10
 
 *Implemented by Marinna Gaudin and Jolann Pommellec*
